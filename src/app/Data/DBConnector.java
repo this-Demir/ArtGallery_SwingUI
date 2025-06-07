@@ -1,0 +1,35 @@
+package app.Data;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class DBConnector {
+
+    // Database credentials
+    private static final String URL = "jdbc:mysql://localhost:3306/artgallerysystem";  // Replace with your database URL
+    private static final String USER = "root";  // Replace with your MySQL username
+    private static final String PASSWORD = "123456789";  // Replace with your MySQL password
+
+
+    public static Connection connect() {
+        try {
+            return DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (SQLException e) {
+            System.err.println("Connection failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+    public static void close(Connection connection) {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error closing connection: " + e.getMessage());
+        }
+    }
+}
+
