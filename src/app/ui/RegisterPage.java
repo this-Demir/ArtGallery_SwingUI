@@ -24,7 +24,7 @@ public class RegisterPage extends JFrame {
 
     public RegisterPage() {
         setTitle("Register");
-        setSize(900, 900); // Resize window for better space
+        setSize(1200, 800); // Resize window for better space
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(true); // Allow resizing

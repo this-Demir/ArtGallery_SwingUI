@@ -2,6 +2,7 @@ package app.ui;
 
 import app.Data.DBConnector;
 import app.models.CurrentUser;
+import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,8 +19,15 @@ public class LoginPage extends JFrame {
     private JButton goToHomePageButton; // HomePage'e gitmek için buton
 
     public LoginPage() {
+
+        try {
+            UIManager.setLookAndFeel(new FlatLightLaf()); // FlatLaf tema uygulandı
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+
         setTitle("Login");
-        setSize(900, 900); // Resize window for better space
+        setSize(1200, 800); // Resize window for better space
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(true); // Allow resizing
@@ -127,7 +135,6 @@ public class LoginPage extends JFrame {
         String password = new String(passwordField.getPassword());
 
         if (validateLogin(email, password)) {
-            JOptionPane.showMessageDialog(this, "Login successful!");
 
             // Update the global currentUser or currentArtist variable
             String sql = "SELECT * FROM Customer WHERE Email = ? AND Password = ?";
