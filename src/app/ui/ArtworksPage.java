@@ -360,6 +360,8 @@ public class ArtworksPage extends JFrame {
             }
         });
 
+        historyButton.addActionListener(e -> OfferHistoryWindow.showBidHistoryPopup(artwork.getArtworkId(), artwork.getTitle()));
+
         offerButton.addActionListener(e -> {
             if (CurrentUser.currentUser == null) {
                 JOptionPane.showMessageDialog(card, "You must be logged in as a customer to make an offer.");
