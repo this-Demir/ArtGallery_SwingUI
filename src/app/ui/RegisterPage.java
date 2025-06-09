@@ -20,26 +20,34 @@ public class RegisterPage extends JFrame {
     private JRadioButton customerRadioButton;
     private JRadioButton artistRadioButton;
     private JButton registerButton;
-    private JButton loginRedirectButton; // Login'a yönlendiren buton
+    private JButton loginRedirectButton;
 
     public RegisterPage() {
         setTitle("Register");
-        setSize(1200, 800); // Resize window for better space
+        setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(true); // Allow resizing
+        setResizable(true);
 
-        // Main panel for form elements
         JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout()); // Changed to GridBagLayout for better control over alignment
+        panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10); // Space between components
+        gbc.insets = new Insets(10, 10, 10, 10);
+        panel.setBackground(new Color(255, 255, 255));
 
-        panel.setBackground(new Color(255, 255, 255)); // White background
+        // Title label
+        JLabel titleLabel = new JLabel("Register Page");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        titleLabel.setForeground(new Color(0, 123, 255));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(titleLabel, gbc);
+        gbc.gridwidth = 1;
 
-        // Aligning radio buttons (Toggle buttons) at the top
+        // Radio buttons
         JPanel radioPanel = new JPanel();
-        radioPanel.setLayout(new FlowLayout(FlowLayout.CENTER));  // Center the radio buttons
+        radioPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         customerRadioButton = new JRadioButton("Register as Customer");
         artistRadioButton = new JRadioButton("Register as Artist");
         ButtonGroup group = new ButtonGroup();
@@ -47,8 +55,7 @@ public class RegisterPage extends JFrame {
         group.add(artistRadioButton);
         radioPanel.add(customerRadioButton);
         radioPanel.add(artistRadioButton);
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+        gbc.gridy++;
         panel.add(radioPanel, gbc);
 
         // Add form fields
@@ -60,7 +67,7 @@ public class RegisterPage extends JFrame {
         // Artist-specific fields
         JLabel artistNote = new JLabel("Biography & Profile Image URL are required for artists only!");
         artistNote.setFont(new Font("Arial", Font.CENTER_BASELINE, 14));
-        artistNote.setForeground(new Color(255, 0, 0));  // Red color for emphasis
+        artistNote.setForeground(new Color(255, 0, 0));
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(artistNote, gbc);
@@ -68,64 +75,58 @@ public class RegisterPage extends JFrame {
         addFormField(panel, gbc, "Biography:", bioField = new JTextField());
         addFormField(panel, gbc, "Profile Image URL:", profileImageField = new JTextField());
 
-        // Register button with modern design
+        // Register button
         registerButton = new JButton("Register");
-        registerButton.setBackground(new Color(0, 123, 255));  // Blue background
-        registerButton.setForeground(Color.WHITE);  // White text
-        registerButton.setFocusPainted(false);  // Remove focus border
+        registerButton.setBackground(new Color(0, 123, 255));
+        registerButton.setForeground(Color.WHITE);
         registerButton.setFont(new Font("Arial", Font.BOLD, 16));
-        registerButton.setPreferredSize(new Dimension(200, 50));  // Button size
+        registerButton.setPreferredSize(new Dimension(200, 50));
+        registerButton.setFocusPainted(false);
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        panel.add(registerButton, gbc);
 
         // Login redirect button
         loginRedirectButton = new JButton("Already have an account? Login");
-        loginRedirectButton.setBackground(new Color(255, 255, 255));  // White background
-        loginRedirectButton.setForeground(new Color(0, 123, 255));  // Blue text
+        loginRedirectButton.setBackground(new Color(255, 255, 255));
+        loginRedirectButton.setForeground(new Color(0, 123, 255));
         loginRedirectButton.setFont(new Font("Arial", Font.PLAIN, 14));
         loginRedirectButton.setFocusPainted(false);
-        loginRedirectButton.setBorderPainted(false);  // No border
-        loginRedirectButton.setAlignmentX(Component.CENTER_ALIGNMENT);  // Center the button
-
-        // Register button action listener
-        registerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleRegisterAction();
-            }
-        });
-
-        // Login redirect button action listener
-        loginRedirectButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openLoginPage();  // Redirect to LoginPage
-            }
-        });
-
-        // Add the buttons to the panel (Move them one step down)
-        gbc.gridx = 0;
-        gbc.gridy = 8;  // Increased the value to move the buttons down one row
-        gbc.gridwidth = 2;  // Make buttons span the entire width
-        panel.add(registerButton, gbc);
-
-        gbc.gridy = 9;  // Move the login redirect button down as well
+        loginRedirectButton.setBorderPainted(false);
+        loginRedirectButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        gbc.gridy++;
         panel.add(loginRedirectButton, gbc);
 
-        // Add the panel to the frame
+        // Home button
+        JButton homeButton = new JButton("Back to Home");
+        homeButton.setBackground(new Color(255, 255, 255));
+        homeButton.setForeground(new Color(40, 167, 69));
+        homeButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        homeButton.setFocusPainted(false);
+        homeButton.setBorderPainted(false);
+        homeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        gbc.gridy++;
+        panel.add(homeButton, gbc);
+
+        // Actions
+        registerButton.addActionListener(e -> handleRegisterAction());
+        loginRedirectButton.addActionListener(e -> openLoginPage());
+        homeButton.addActionListener(e -> openHomePage());
+
         add(panel);
     }
 
-    // Method to add form fields with GridBagLayout constraints
     private void addFormField(JPanel panel, GridBagConstraints gbc, String label, JTextField field) {
         JLabel jLabel = new JLabel(label);
         jLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        jLabel.setForeground(new Color(80, 80, 80)); // Gray label color
+        jLabel.setForeground(new Color(80, 80, 80));
 
         field.setPreferredSize(new Dimension(350, 40));
         field.setFont(new Font("Arial", Font.PLAIN, 14));
-        field.setBackground(new Color(240, 240, 240));  // Light gray background
-        field.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));  // Border
+        field.setBackground(new Color(240, 240, 240));
+        field.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
 
-        // Set constraints for the label and text field
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(jLabel, gbc);
@@ -134,7 +135,6 @@ public class RegisterPage extends JFrame {
         panel.add(field, gbc);
     }
 
-    // Handle register action
     private void handleRegisterAction() {
         String fullName = fullNameField.getText();
         String email = emailField.getText();
@@ -143,18 +143,14 @@ public class RegisterPage extends JFrame {
         String bio = bioField.getText();
         String profileImage = profileImageField.getText();
 
-        // Check if any required field is empty
         if (fullName.isEmpty() || email.isEmpty() || password.isEmpty() || address.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all required fields.");
-            return;  // Stop further processing if fields are empty
+            return;
         }
 
-        // Proceed with registration based on the selected type
         if (customerRadioButton.isSelected()) {
-            // Register as Customer
             registerCustomer(fullName, email, password, address);
         } else if (artistRadioButton.isSelected()) {
-            // Register as Artist
             if (bio.isEmpty() || profileImage.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields for Artist.");
                 return;
@@ -165,24 +161,23 @@ public class RegisterPage extends JFrame {
         }
     }
 
-    // Register Customer in the database
     private void registerCustomer(String fullName, String email, String password, String address) {
-        String sql = "INSERT INTO Customer (CustomerId, FullName, Email, Password, Address, CreatedAt) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "{CALL sp_RegisterCustomer(?, ?, ?, ?, ?)}";
 
         try (Connection conn = DBConnector.connect();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             CallableStatement stmt = conn.prepareCall(sql)) {
 
-            String customerId = UUID.randomUUID().toString(); // Generate CustomerId
+            String customerId = UUID.randomUUID().toString();
 
             stmt.setString(1, customerId);
             stmt.setString(2, fullName);
             stmt.setString(3, email);
             stmt.setString(4, password);
             stmt.setString(5, address);
-            stmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
 
-            stmt.executeUpdate();
+            stmt.execute();
             JOptionPane.showMessageDialog(this, "Customer registered successfully!");
+            openLoginPage(); // Auto-redirect to login
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -190,14 +185,13 @@ public class RegisterPage extends JFrame {
         }
     }
 
-    // Register Artist in the database
     private void registerArtist(String fullName, String email, String password, String bio, String profileImage) {
-        String sql = "INSERT INTO Artist (ArtistId, FullName, Email, Password, Bio, ProfileImgUrl, ArtistRate, CreatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "{CALL sp_RegisterArtist(?, ?, ?, ?, ?, ?, ?)}";
 
         try (Connection conn = DBConnector.connect();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             CallableStatement stmt = conn.prepareCall(sql)) {
 
-            String artistId = UUID.randomUUID().toString(); // Generate ArtistId
+            String artistId = UUID.randomUUID().toString();
 
             stmt.setString(1, artistId);
             stmt.setString(2, fullName);
@@ -205,11 +199,11 @@ public class RegisterPage extends JFrame {
             stmt.setString(4, password);
             stmt.setString(5, bio);
             stmt.setString(6, profileImage);
-            stmt.setBigDecimal(7, new java.math.BigDecimal(0));  // ArtistRate set to 0
-            stmt.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+            stmt.setBigDecimal(7, new java.math.BigDecimal("0"));
 
-            stmt.executeUpdate();
+            stmt.execute();
             JOptionPane.showMessageDialog(this, "Artist registered successfully!");
+            openLoginPage(); // Auto-redirect to login
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -217,11 +211,16 @@ public class RegisterPage extends JFrame {
         }
     }
 
-    // Open the LoginPage when the user clicks on the "Login" button
     private void openLoginPage() {
         LoginPage loginPage = new LoginPage();
         loginPage.setVisible(true);
-        this.setVisible(false);  // Hide the register page when the login page opens
+        this.setVisible(false);
+    }
+
+    private void openHomePage() {
+        HomePage homePage = new HomePage();
+        homePage.setVisible(true);
+        this.setVisible(false);
     }
 
     public static void main(String[] args) {

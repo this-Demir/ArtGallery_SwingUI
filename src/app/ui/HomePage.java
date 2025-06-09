@@ -5,8 +5,6 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class HomePage extends JFrame {
 
@@ -30,7 +28,7 @@ public class HomePage extends JFrame {
         // Navbar (üst panel)
         JPanel navBarPanel = new JPanel(new BorderLayout());
         navBarPanel.setBackground(new Color(72, 144, 239));
-        navBarPanel.setPreferredSize(new Dimension(900, 50));  // Küçültülmüş yükseklik
+        navBarPanel.setPreferredSize(new Dimension(900, 50));
 
         JLabel artGalleryLabel = new JLabel("  Art Gallery");
         artGalleryLabel.setFont(new Font("Serif", Font.BOLD, 20));
@@ -38,33 +36,54 @@ public class HomePage extends JFrame {
         navBarPanel.add(artGalleryLabel, BorderLayout.WEST);
 
         JPanel navButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        navButtonPanel.setOpaque(false); // Buton paneli navbarla aynı renk kalsın
+        navButtonPanel.setOpaque(false);
 
         JButton loginButton = new JButton("Login");
         JButton registerButton = new JButton("Register");
         JButton logoutButton = new JButton("Logout");
+        JButton favoritesButton = new JButton("Favorites");
+        JButton manageArtworksButton = new JButton("Manage My Artworks");
+
+        favoritesButton.setBackground(new Color(40, 167, 69));
+        favoritesButton.setForeground(Color.WHITE);
+        favoritesButton.setPreferredSize(new Dimension(100, 30));
+        favoritesButton.setFocusPainted(false);
+        favoritesButton.addActionListener(e -> openFavoritesPage());
+
+        manageArtworksButton.setBackground(new Color(113, 186, 28));
+        manageArtworksButton.setForeground(Color.WHITE);
+        manageArtworksButton.setPreferredSize(new Dimension(170, 30));
+        manageArtworksButton.setFocusPainted(false);
+        manageArtworksButton.addActionListener(e -> openManageArtworksPage());
 
         if (CurrentUser.currentUser != null || CurrentUser.currentArtist != null) {
             loginButton.setVisible(false);
             registerButton.setVisible(false);
+
             logoutButton.setBackground(new Color(220, 53, 69));
             logoutButton.setForeground(Color.WHITE);
             logoutButton.setFont(new Font("Arial", Font.BOLD, 12));
             logoutButton.setPreferredSize(new Dimension(90, 30));
-
             logoutButton.addActionListener(e -> logoutUser());
+
+            if (CurrentUser.currentUser != null) {
+                navButtonPanel.add(favoritesButton);
+            }
+            if (CurrentUser.currentArtist != null) {
+                navButtonPanel.add(manageArtworksButton);
+            }
+
             navButtonPanel.add(logoutButton);
 
         } else {
             loginButton.setBackground(new Color(33, 150, 243));
             loginButton.setForeground(Color.WHITE);
             loginButton.setPreferredSize(new Dimension(90, 30));
+            loginButton.addActionListener(e -> openLoginPage());
 
             registerButton.setBackground(new Color(33, 150, 243));
             registerButton.setForeground(Color.WHITE);
             registerButton.setPreferredSize(new Dimension(90, 30));
-
-            loginButton.addActionListener(e -> openLoginPage());
             registerButton.addActionListener(e -> openRegisterPage());
 
             navButtonPanel.add(loginButton);
@@ -97,52 +116,42 @@ public class HomePage extends JFrame {
         seeAllArtworksButton.setBackground(new Color(72, 144, 239));
         seeAllArtworksButton.setForeground(Color.WHITE);
         seeAllArtworksButton.setFocusPainted(false);
-        seeAllArtworksButton.setPreferredSize(new Dimension(200, 40));
+        seeAllArtworksButton.setPreferredSize(new Dimension(400, 80));
         seeAllArtworksButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         seeAllArtworksButton.addActionListener(e -> openArtworksPage());
 
         headerPanel.add(Box.createVerticalStrut(20));
         headerPanel.add(seeAllArtworksButton);
 
-        // Eğer artist giriş yaptıysa, özel buton ekle
-        if (CurrentUser.currentArtist != null) {
-            JButton manageArtworksButton = new JButton("Manage My Artworks");
-            manageArtworksButton.setFont(new Font("Arial", Font.BOLD, 16));
-            manageArtworksButton.setBackground(new Color(33, 150, 243));
-            manageArtworksButton.setForeground(Color.WHITE);
-            manageArtworksButton.setFocusPainted(false);
-            manageArtworksButton.setPreferredSize(new Dimension(250, 50));
-            manageArtworksButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-            manageArtworksButton.addActionListener(e -> JOptionPane.showMessageDialog(null, "Manage My Artworks sayfasına yönlendiriliyorsunuz."));
-            headerPanel.add(Box.createVerticalStrut(20));
-            headerPanel.add(manageArtworksButton);
-        }
+        JLabel aboutUsContent = new JLabel("<html><div style='text-align: center;'>"
+                + "<br><b>About Us</b><br><br>"
+                + "Art Gallery is a modern platform for discovering, rating, and bidding on fine art.<br><br>"
+                + "Built by software engineering students at Yaşar University, the system provides a seamless experience for both customers and artists.<br><br>"
+                + "Technologies used include Java Swing, MySQL.<br><br>"
+                + "Enjoy browsing, rating, and purchasing unique artworks curated from talented artists."
+                + "</div></html>");
+        aboutUsContent.setFont(new Font("Arial", Font.PLAIN, 16));
+        aboutUsContent.setForeground(Color.DARK_GRAY);
+        aboutUsContent.setHorizontalAlignment(SwingConstants.CENTER);
+        aboutUsContent.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Footer
+        headerPanel.add(Box.createVerticalStrut(40));
+        headerPanel.add(aboutUsContent);
+
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         footerPanel.setBackground(new Color(0, 123, 255));
-        footerPanel.setPreferredSize(new Dimension(900, 40));  // Küçültülmüş yükseklik
+        footerPanel.setPreferredSize(new Dimension(900, 40));
 
-        JLabel footerLabel = new JLabel("© 2025 Sanat Galerisi | About Us");
+        JLabel footerLabel = new JLabel("© 2025 Sanat Galerisi");
         footerLabel.setForeground(Color.WHITE);
-        footerLabel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                showAboutUs();
-            }
-        });
 
         footerPanel.add(footerLabel);
 
-        // Panel bileşenlerini ana panele ekle
         mainPanel.add(navBarPanel, BorderLayout.NORTH);
         mainPanel.add(headerPanel, BorderLayout.CENTER);
         mainPanel.add(footerPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
-    }
-
-    private void showAboutUs() {
-        JOptionPane.showMessageDialog(this, "Sanat Galerisi hakkında bilgi...\nBizi takip edin!");
     }
 
     private void openLoginPage() {
@@ -160,7 +169,7 @@ public class HomePage extends JFrame {
     private void logoutUser() {
         CurrentUser.currentUser = null;
         CurrentUser.currentArtist = null;
-        JOptionPane.showMessageDialog(this, "Başarıyla çıkış yaptınız!");
+        JOptionPane.showMessageDialog(this, "Logged out successfully!");
         dispose();
         HomePage homePage = new HomePage();
         homePage.setVisible(true);
@@ -169,6 +178,18 @@ public class HomePage extends JFrame {
     private void openArtworksPage() {
         ArtworksPage artworksPage = new ArtworksPage();
         artworksPage.setVisible(true);
+        this.setVisible(false);
+    }
+
+    private void openFavoritesPage() {
+        FavoritesPage favoritesPage = new FavoritesPage();
+        favoritesPage.setVisible(true);
+        this.setVisible(false);
+    }
+
+    private void openManageArtworksPage() {
+        ManageArtworksPage managePage = new ManageArtworksPage();
+        managePage.setVisible(true);
         this.setVisible(false);
     }
 

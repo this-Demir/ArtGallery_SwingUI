@@ -26,33 +26,28 @@ public class ArtworksPage extends JFrame {
         setLocationRelativeTo(null);
         setResizable(true);
 
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.white);
 
-        // NAVBAR (updated with "Return to Home Page" button)
         JPanel navBarPanel = new JPanel(new BorderLayout());
-        navBarPanel.setBackground(new Color(72, 144, 239)); // Blue background
-        navBarPanel.setPreferredSize(new Dimension(1000, 50));  // Set navbar height
-
+        navBarPanel.setBackground(new Color(72, 144, 239));
+        navBarPanel.setPreferredSize(new Dimension(1000, 50));
 
         JLabel artGalleryLabel = new JLabel("  Art Gallery");
         artGalleryLabel.setFont(new Font("Serif", Font.BOLD, 20));
         artGalleryLabel.setForeground(Color.WHITE);
         navBarPanel.add(artGalleryLabel, BorderLayout.WEST);
 
-        // "Return to Home Page" button in navbar
         JButton returnHomeButton = new JButton("Return to Home Page");
         returnHomeButton.setFont(new Font("Arial", Font.BOLD, 16));
-        returnHomeButton.setBackground(new Color(33, 150, 243)); // Blue background
+        returnHomeButton.setBackground(new Color(113, 186, 28));
         returnHomeButton.setForeground(Color.WHITE);
         returnHomeButton.setFocusPainted(false);
         returnHomeButton.setPreferredSize(new Dimension(200, 50));
         returnHomeButton.addActionListener(e -> returnToHomePage());
         navBarPanel.add(returnHomeButton, BorderLayout.EAST);
 
-        // HEADER (Search and Category filter)
-        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // Use FlowLayout to align items horizontally
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
         headerPanel.setBackground(Color.white);
 
@@ -73,8 +68,7 @@ public class ArtworksPage extends JFrame {
         categoryComboBox = new JComboBox<>(categories);
         headerPanel.add(categoryComboBox);
 
-        // CONTENT PANEL (using GridLayout for even grid-like arrangement)
-        artworkGridPanel = new JPanel(new GridLayout(0, 3, 20, 20)); // 3 columns, dynamic rows
+        artworkGridPanel = new JPanel(new GridLayout(0, 3, 20, 20));
         artworkGridPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
         artworkGridPanel.setBackground(Color.white);
 
@@ -82,23 +76,20 @@ public class ArtworksPage extends JFrame {
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        // FOOTER
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        footerPanel.setBackground(new Color(0, 123, 255));  // Blue background
-        footerPanel.setPreferredSize(new Dimension(1000, 40));  // Set footer height
+        footerPanel.setBackground(new Color(0, 123, 255));
+        footerPanel.setPreferredSize(new Dimension(1000, 40));
 
         JLabel footerLabel = new JLabel("© 2025 Art Gallery | About Us");
         footerLabel.setForeground(Color.WHITE);
         footerPanel.add(footerLabel);
 
-        // Add components to main panel
-        mainPanel.add(navBarPanel,BorderLayout.PAGE_END); // NAVBAR
-        mainPanel.add(headerPanel, BorderLayout.PAGE_START); // HEADER (Search + Category filter)
-        mainPanel.add(scrollPane, BorderLayout.CENTER); // CONTENT (Artworks)
-        mainPanel.add(footerPanel, BorderLayout.SOUTH); // FOOTER
+        mainPanel.add(navBarPanel, BorderLayout.PAGE_END);
+        mainPanel.add(headerPanel, BorderLayout.PAGE_START);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(footerPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
-
         loadArtworks();
     }
 
@@ -137,56 +128,63 @@ public class ArtworksPage extends JFrame {
                 String artworkId = rs.getString("ArtworkId");
                 String title = rs.getString("Title");
                 String artistName = getArtistNameById(rs.getString("ArtistId"));
-                double basePrice = rs.getDouble("BasePrice");
+                double currentPrice = getHighestOffer(artworkId);
                 double rating = getRatingForArtwork(artworkId);
                 List<String> imageUrls = getImageUrlsForArtwork(artworkId);
                 String artworkCategory = rs.getString("Category");
-
-                Timestamp endTime = getEndTimeForArtwork(artworkId);  // Get endTime from Countdown table
-                artworks.add(new Artwork(artworkId, title, artistName, basePrice, rating, basePrice, imageUrls, artworkCategory, endTime));
+                Timestamp endTime = getEndTimeForArtwork(artworkId);
+                artworks.add(new Artwork(artworkId, title, artistName, currentPrice, rating, currentPrice, imageUrls, artworkCategory, endTime));
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return artworks;
     }
 
-    private Timestamp getEndTimeForArtwork(String artworkId) {
-        String sql = "SELECT EndTime FROM Countdown WHERE ArtworkId = ?";
+    private double getHighestOffer(String artworkId) {
+        String sql = "SELECT MAX(Amount) AS MaxOffer FROM Offer WHERE ArtworkId = ?";
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setString(1, artworkId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getTimestamp("EndTime");
+                double offer = rs.getDouble("MaxOffer");
+                return offer > 0 ? offer : getBasePrice(artworkId);
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return getBasePrice(artworkId);
+    }
+
+    private double getBasePrice(String artworkId) {
+        String sql = "SELECT BasePrice FROM Artwork WHERE ArtworkId = ?";
+        try (Connection conn = DBConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, artworkId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("BasePrice");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private List<String> getImageUrlsForArtwork(String artworkId) {
         List<String> imageUrls = new ArrayList<>();
         String sql = "SELECT ImageUrl FROM ArtworkImages WHERE ArtworkId = ?";
-
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setString(1, artworkId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 imageUrls.add(rs.getString("ImageUrl"));
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return imageUrls;
     }
 
@@ -214,41 +212,34 @@ public class ArtworksPage extends JFrame {
         return 0;
     }
 
-    private String getTimeLeft(Timestamp endTime) {
-        long diff = endTime.getTime() - System.currentTimeMillis();
-
-        long days = diff / (24 * 60 * 60 * 1000);
-        long hours = (diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000);
-        long minutes = (diff % (60 * 60 * 1000)) / (60 * 1000);
-        long seconds = (diff % (60 * 1000)) / 1000;
-
-        return days + "d " + hours + "h " + minutes + "m " + seconds + "s left";
+    private Timestamp getEndTimeForArtwork(String artworkId) {
+        String sql = "SELECT EndTime FROM Countdown WHERE ArtworkId = ?";
+        try (Connection conn = DBConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, artworkId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getTimestamp("EndTime");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private JPanel createImageSlider(List<String> imagePaths) {
         JPanel sliderPanel = new JPanel(new BorderLayout());
-        JLabel imageLabel = new JLabel();
-        imageLabel.setHorizontalAlignment(JLabel.CENTER);
-        imageLabel.setVerticalAlignment(JLabel.CENTER);
+        JLabel imageLabel = new JLabel("", JLabel.CENTER);
+        sliderPanel.setPreferredSize(new Dimension(260, 180));
 
-        if (imagePaths.isEmpty()) return sliderPanel;
+        if (imagePaths == null || imagePaths.isEmpty()) {
+            imageLabel.setText("No Image Available");
+            sliderPanel.add(imageLabel, BorderLayout.CENTER);
+            return sliderPanel;
+        }
 
         int[] currentIndex = {0};
-
-        // Resim yolunun doğru olduğundan emin olun ve tek bir yol ekleyin
-        String imagePath = imagePaths.get(currentIndex[0]);
-
-        // getClass().getClassLoader().getResource ile doğru yolu alın
-        URL imgURL = getClass().getClassLoader().getResource(imagePath);
-
-        if (imgURL != null) {
-            ImageIcon icon = new ImageIcon(imgURL);
-            Image image = icon.getImage().getScaledInstance(260, 180, Image.SCALE_SMOOTH);
-            imageLabel.setIcon(new ImageIcon(image));
-        } else {
-            // Eğer resim bulunamazsa, hata mesajı yazdırın
-            System.out.println("Image not found: " + imagePath);
-        }
+        updateImage(imageLabel, imagePaths.get(currentIndex[0]));
 
         JButton prevButton = new JButton("<");
         JButton nextButton = new JButton(">");
@@ -266,20 +257,18 @@ public class ArtworksPage extends JFrame {
         sliderPanel.add(prevButton, BorderLayout.WEST);
         sliderPanel.add(imageLabel, BorderLayout.CENTER);
         sliderPanel.add(nextButton, BorderLayout.EAST);
-        sliderPanel.setPreferredSize(new Dimension(260, 180));
+
         return sliderPanel;
     }
 
     private void updateImage(JLabel imageLabel, String imagePath) {
-        String fullImagePath = imagePath;
-        URL imgURL = getClass().getClassLoader().getResource(fullImagePath);
-
+        URL imgURL = getClass().getClassLoader().getResource(imagePath);
         if (imgURL != null) {
             ImageIcon newIcon = new ImageIcon(imgURL);
             Image newImage = newIcon.getImage().getScaledInstance(260, 180, Image.SCALE_SMOOTH);
             imageLabel.setIcon(new ImageIcon(newImage));
         } else {
-            System.out.println("Image not found: " + fullImagePath);
+            imageLabel.setText("Image not found");
         }
     }
 
@@ -291,49 +280,36 @@ public class ArtworksPage extends JFrame {
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
-        card.setPreferredSize(new Dimension(300, 450)); // Kart boyutunu büyüttük
+        card.setPreferredSize(new Dimension(300, 450));
 
-        // Image slider
         card.add(createImageSlider(artwork.getImageURL()));
         card.add(Box.createVerticalStrut(10));
 
-        // Title
         JLabel titleLabel = new JLabel("<html><b>" + artwork.getTitle() + "</b></html>", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // Artist
         JLabel artistLabel = new JLabel("Artist: " + artwork.getArtistName(), SwingConstants.CENTER);
         artistLabel.setForeground(new Color(33, 150, 243));
         artistLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         artistLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // Price
-        JLabel priceLabel = new JLabel("Current Price: $" + artwork.getCurrentPrice());
+        JLabel priceLabel = new JLabel("Current Price: ₺" + artwork.getCurrentPrice());
         priceLabel.setFont(new Font("Arial", Font.PLAIN, 13));
         priceLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // Rating
         JLabel ratingLabel = new JLabel("Rating: " + String.format("%.1f", artwork.getRating()) + "/5");
         ratingLabel.setFont(new Font("Arial", Font.PLAIN, 13));
         ratingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // Category
-        JLabel categoryLabel = new JLabel("Category: " + artwork.getCategory()); // Category added
+        JLabel categoryLabel = new JLabel("Category: " + artwork.getCategory());
         categoryLabel.setFont(new Font("Arial", Font.PLAIN, 13));
         categoryLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Countdown Timer
         JLabel countdownLabel = new JLabel();
         countdownLabel.setForeground(Color.RED);
         countdownLabel.setFont(new Font("Arial", Font.BOLD, 14));
         countdownLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Calculate and update countdown, check if endTime is null
         if (artwork.getEndTime() != null) {
             countdownTimer = new Timer(1000, e -> {
                 long remainingTime = artwork.getEndTime().getTime() - System.currentTimeMillis();
-
                 long days = remainingTime / (1000 * 60 * 60 * 24);
                 long hours = (remainingTime / (1000 * 60 * 60)) % 24;
                 long minutes = (remainingTime / (1000 * 60)) % 60;
@@ -351,7 +327,6 @@ public class ArtworksPage extends JFrame {
             countdownLabel.setText("Auction Ended");
         }
 
-        // Buttons
         JButton favButton = new JButton("Add to Favorites");
         JButton offerButton = new JButton("Make an Offer");
         JButton rateButton = new JButton("Rate this Artwork");
@@ -362,14 +337,47 @@ public class ArtworksPage extends JFrame {
             btn.setMaximumSize(new Dimension(200, 30));
         }
 
-        // Add to card
+        favButton.addActionListener(e -> {
+            if (CurrentUser.currentUser == null) {
+                JOptionPane.showMessageDialog(card, "You must be logged in as a customer to favorite artworks.");
+                return;
+            }
+            String sql = "INSERT IGNORE INTO Favorites (CustomerId, ArtworkId, FavoritedAt) VALUES (?, ?, NOW())";
+            try (Connection conn = DBConnector.connect();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, CurrentUser.currentUser);
+                stmt.setString(2, artwork.getArtworkId());
+                int affectedRows = stmt.executeUpdate();
+                if (affectedRows > 0) {
+                    JOptionPane.showMessageDialog(card, "Artwork added to favorites.");
+                } else {
+                    JOptionPane.showMessageDialog(card, "This artwork is already in your favorites.");
+                }
+                loadArtworks();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(card, "An error occurred while adding to favorites.");
+            }
+        });
+
+        offerButton.addActionListener(e -> {
+            if (CurrentUser.currentUser == null) {
+                JOptionPane.showMessageDialog(card, "You must be logged in as a customer to make an offer.");
+                return;
+            }
+            MakeOfferWindow.showOfferPopup(artwork.getArtworkId());
+            loadArtworks();
+        });
+
+        rateButton.addActionListener(e -> RateArtworkWindow.showRatingDialog(this, artwork.getArtworkId(), artwork.getTitle()));
+
         card.add(titleLabel);
         card.add(Box.createVerticalStrut(5));
         card.add(artistLabel);
         card.add(priceLabel);
         card.add(ratingLabel);
-        card.add(categoryLabel); // Category added
-        card.add(countdownLabel); // Countdown added
+        card.add(categoryLabel);
+        card.add(countdownLabel);
         card.add(Box.createVerticalStrut(10));
         card.add(favButton);
         card.add(offerButton);
@@ -379,11 +387,10 @@ public class ArtworksPage extends JFrame {
         return card;
     }
 
-    // Navigate back to HomePage
     private void returnToHomePage() {
         HomePage homePage = new HomePage();
         homePage.setVisible(true);
-        this.setVisible(false); // Close current window
+        this.setVisible(false);
     }
 
     public static void main(String[] args) {
