@@ -60,9 +60,18 @@ public class RateArtworkWindow {
                 "Submit"
         );
 
-        if (result == JOptionPane.OK_OPTION) {
-            int selectedRating = (Integer) ratingCombo.getSelectedItem();
-            saveRating(artworkId, selectedRating);
+        if(CurrentUser.currentUser != null){
+            if (result == JOptionPane.OK_OPTION) {
+                int selectedRating = (Integer) ratingCombo.getSelectedItem();
+                saveRating(artworkId, selectedRating);
+            }
+        }else{
+            JOptionPane.showMessageDialog(
+                    parentFrame,
+                    "You must be logged in to rate artworks.",
+                    "Login Required",
+                    JOptionPane.WARNING_MESSAGE
+            );
         }
     }
 
