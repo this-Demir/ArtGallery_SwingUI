@@ -1,8 +1,11 @@
-package app.ui;
+package app.ui.pages;
 
 import app.models.CurrentUser;
-import app.Data.DBConnector;
+import app.data.DBConnector;
 import app.models.Artwork;
+import app.ui.windows.MakeOfferWindow;
+import app.ui.windows.OfferHistoryWindow;
+import app.ui.windows.RateArtworkWindow;
 
 import javax.swing.*;
 import java.awt.*;
@@ -372,6 +375,25 @@ public class ArtworksPage extends JFrame {
         });
 
         rateButton.addActionListener(e -> RateArtworkWindow.showRatingDialog(this, artwork.getArtworkId(), artwork.getTitle()));
+
+        artistLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+
+                try (Connection conn = DBConnector.connect();
+                     PreparedStatement stmt = conn.prepareStatement("SELECT ArtistId FROM Artwork WHERE ArtworkId = ?")) {
+                    stmt.setString(1, artwork.getArtworkId());
+                    ResultSet rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        String artistId = rs.getString("ArtistId");
+                        CurrentUser.currentArtist = artistId;
+                        new ArtistProfilePage().setVisible(true);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Unable to open artist profile.");
+                }
+            }
+        });
 
         card.add(titleLabel);
         card.add(Box.createVerticalStrut(5));

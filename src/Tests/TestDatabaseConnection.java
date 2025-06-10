@@ -1,14 +1,11 @@
 package Tests;
 
-import app.Data.DBConnector;
-import app.Data.DBSeeder;
-
-import java.sql.Connection;
+import app.data.DBSeeder;
 
 public class TestDatabaseConnection {
 
     public static void main(String[] args) {
-        // Run once
+        // Run once  - Demir
         DBSeeder dbSeeder = new DBSeeder();
 
         // Seed customers, artists, and artworks

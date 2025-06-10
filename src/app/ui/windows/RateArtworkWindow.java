@@ -1,6 +1,6 @@
-package app.ui;
+package app.ui.windows;
 
-import app.Data.DBConnector;
+import app.data.DBConnector;
 import app.models.CurrentUser;
 
 import javax.swing.*;
@@ -8,7 +8,6 @@ import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 public class RateArtworkWindow {
 

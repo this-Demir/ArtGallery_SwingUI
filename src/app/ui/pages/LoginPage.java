@@ -1,6 +1,6 @@
-package app.ui;
+package app.ui.pages;
 
-import app.Data.DBConnector;
+import app.data.DBConnector;
 import app.models.CurrentUser;
 import com.formdev.flatlaf.FlatLightLaf;
 
@@ -35,7 +35,7 @@ public class LoginPage extends JFrame {
         gbc.insets = new Insets(10, 10, 10, 10);
         panel.setBackground(new Color(255, 255, 255));
 
-        // Title
+
         JLabel titleLabel = new JLabel("Login Page");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setForeground(new Color(0, 123, 255));
@@ -73,12 +73,12 @@ public class LoginPage extends JFrame {
         goToHomePageButton.setBorderPainted(false);
         goToHomePageButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Button actions
+
         loginButton.addActionListener(e -> handleLoginAction());
         registerRedirectButton.addActionListener(e -> openRegisterPage());
         goToHomePageButton.addActionListener(e -> openHomePage());
 
-        // Add buttons to panel
+
         gbc.gridx = 0;
         gbc.gridy++;
         panel.add(loginButton, gbc);

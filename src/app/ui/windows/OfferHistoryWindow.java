@@ -1,6 +1,6 @@
-package app.ui;
+package app.ui.windows;
 
-import app.Data.DBConnector;
+import app.data.DBConnector;
 
 import javax.swing.*;
 import java.awt.*;

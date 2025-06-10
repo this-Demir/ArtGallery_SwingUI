@@ -1,11 +1,9 @@
-package app.ui;
+package app.ui.pages;
 
-import app.Data.DBConnector;
+import app.data.DBConnector;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.UUID;
 
@@ -35,7 +33,7 @@ public class RegisterPage extends JFrame {
         gbc.insets = new Insets(10, 10, 10, 10);
         panel.setBackground(new Color(255, 255, 255));
 
-        // Title label
+        // Title
         JLabel titleLabel = new JLabel("Register Page");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setForeground(new Color(0, 123, 255));

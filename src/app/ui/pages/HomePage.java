@@ -1,4 +1,4 @@
-package app.ui;
+package app.ui.pages;
 
 import app.models.CurrentUser;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -15,7 +15,7 @@ public class HomePage extends JFrame {
             e.printStackTrace();
         }
 
-        setTitle("Sanat Galerisi");
+        setTitle("Art Gallery");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -44,6 +44,14 @@ public class HomePage extends JFrame {
         JButton favoritesButton = new JButton("Favorites");
         JButton manageArtworksButton = new JButton("Manage My Artworks");
 
+        JButton myProfileButton = new JButton("My Profile");
+        myProfileButton.setBackground(new Color(186, 166, 11));
+        myProfileButton.setForeground(Color.WHITE);
+        myProfileButton.setPreferredSize(new Dimension(120, 30));
+        myProfileButton.setFocusPainted(false);
+        myProfileButton.addActionListener(e -> openArtistProfilePage());
+
+
         favoritesButton.setBackground(new Color(40, 167, 69));
         favoritesButton.setForeground(Color.WHITE);
         favoritesButton.setPreferredSize(new Dimension(100, 30));
@@ -71,6 +79,7 @@ public class HomePage extends JFrame {
             }
             if (CurrentUser.currentArtist != null) {
                 navButtonPanel.add(manageArtworksButton);
+                navButtonPanel.add(myProfileButton);
             }
 
             navButtonPanel.add(logoutButton);
@@ -92,7 +101,6 @@ public class HomePage extends JFrame {
 
         navBarPanel.add(navButtonPanel, BorderLayout.EAST);
 
-        // Header Panel (orta içerik)
         JPanel headerPanel = new JPanel();
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
         headerPanel.setBackground(Color.white);
@@ -142,7 +150,7 @@ public class HomePage extends JFrame {
         footerPanel.setBackground(new Color(0, 123, 255));
         footerPanel.setPreferredSize(new Dimension(900, 40));
 
-        JLabel footerLabel = new JLabel("© 2025 Sanat Galerisi");
+        JLabel footerLabel = new JLabel("© 2025 Art Gallery");
         footerLabel.setForeground(Color.WHITE);
 
         footerPanel.add(footerLabel);
@@ -153,6 +161,13 @@ public class HomePage extends JFrame {
 
         add(mainPanel);
     }
+
+    private void openArtistProfilePage() {
+        ArtistProfilePage profilePage = new ArtistProfilePage();
+        profilePage.setVisible(true);
+        this.setVisible(false);
+    }
+
 
     private void openLoginPage() {
         LoginPage loginPage = new LoginPage();

@@ -1,4 +1,4 @@
-package app.Data;
+package app.data;
 
 import java.sql.*;
 import java.util.UUID;
