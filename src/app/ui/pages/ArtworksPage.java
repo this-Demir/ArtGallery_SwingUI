@@ -97,6 +97,7 @@ public class ArtworksPage extends JFrame {
     }
 
     private void loadArtworks() {
+        checkAndFinalizeAuctions();
         artworkGridPanel.removeAll();
         String searchQuery = searchField.getText().trim();
         String category = (String) categoryComboBox.getSelectedItem();
@@ -230,6 +231,54 @@ public class ArtworksPage extends JFrame {
         return null;
     }
 
+    private void checkAndFinalizeAuctions() {
+        String sql = "SELECT a.ArtworkId, c.EndTime, a.Status FROM Artwork a " +
+                "JOIN Countdown c ON a.ArtworkId = c.ArtworkId " +
+                "WHERE c.EndTime < NOW() AND a.Status = 'open_to_sale'";
+
+        try (Connection conn = DBConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String artworkId = rs.getString("ArtworkId");
+
+                String offerSql = "SELECT OfferId FROM Offer WHERE ArtworkId = ? ORDER BY Amount DESC LIMIT 1";
+                try (PreparedStatement offerStmt = conn.prepareStatement(offerSql)) {
+                    offerStmt.setString(1, artworkId);
+                    ResultSet offerRs = offerStmt.executeQuery();
+
+                    if (offerRs.next()) {
+                        // Teklif varsa: Satışı gerçekleştir
+                        String offerId = offerRs.getString("OfferId");
+                        String saleSql = "INSERT INTO Sales (SaleId, OfferId, SoldAt) VALUES (UUID(), ?, NOW())";
+                        try (PreparedStatement saleStmt = conn.prepareStatement(saleSql)) {
+                            saleStmt.setString(1, offerId);
+                            saleStmt.executeUpdate();
+                        }
+
+                        String updateArtwork = "UPDATE Artwork SET Status = 'sold' WHERE ArtworkId = ?";
+                        try (PreparedStatement updateStmt = conn.prepareStatement(updateArtwork)) {
+                            updateStmt.setString(1, artworkId);
+                            updateStmt.executeUpdate();
+                        }
+                    } else {
+                        // Teklif yoksa: Satılamadı
+                        String updateArtwork = "UPDATE Artwork SET Status = 'close_to_sale' WHERE ArtworkId = ?";
+                        try (PreparedStatement updateStmt = conn.prepareStatement(updateArtwork)) {
+                            updateStmt.setString(1, artworkId);
+                            updateStmt.executeUpdate();
+                        }
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private JPanel createImageSlider(List<String> imagePaths) {
         JPanel sliderPanel = new JPanel(new BorderLayout());
         JLabel imageLabel = new JLabel("", JLabel.CENTER);
@@ -291,16 +340,38 @@ public class ArtworksPage extends JFrame {
         JLabel titleLabel = new JLabel("<html><b>" + artwork.getTitle() + "</b></html>", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         JLabel artistLabel = new JLabel("Artist: " + artwork.getArtistName(), SwingConstants.CENTER);
         artistLabel.setForeground(new Color(33, 150, 243));
         artistLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         artistLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        artistLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        artistLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                try (Connection conn = DBConnector.connect();
+                     PreparedStatement stmt = conn.prepareStatement("SELECT ArtistId FROM Artwork WHERE ArtworkId = ?")) {
+                    stmt.setString(1, artwork.getArtworkId());
+                    ResultSet rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        String artistId = rs.getString("ArtistId");
+                        CurrentUser.currentArtist = artistId;
+                        new ArtistProfilePage().setVisible(true);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Unable to open artist profile.");
+                }
+            }
+        });
+
         JLabel priceLabel = new JLabel("Current Price: ₺" + artwork.getCurrentPrice());
         priceLabel.setFont(new Font("Arial", Font.PLAIN, 13));
         priceLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         JLabel ratingLabel = new JLabel("Rating: " + String.format("%.1f", artwork.getRating()) + "/5");
         ratingLabel.setFont(new Font("Arial", Font.PLAIN, 13));
         ratingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         JLabel categoryLabel = new JLabel("Category: " + artwork.getCategory());
         categoryLabel.setFont(new Font("Arial", Font.PLAIN, 13));
         categoryLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -321,13 +392,13 @@ public class ArtworksPage extends JFrame {
                 if (remainingTime > 0) {
                     countdownLabel.setText("Time left: " + days + "d " + hours + "h " + minutes + "m " + seconds + "s");
                 } else {
-                    countdownLabel.setText("Auction Ended");
+                    countdownLabel.setText("Auction Ended & Closed to Sale");
                     countdownTimer.stop();
                 }
             });
             countdownTimer.start();
         } else {
-            countdownLabel.setText("Auction Ended");
+            countdownLabel.setText("Auction Ended & Closed to Sale");
         }
 
         JButton favButton = new JButton("Add to Favorites");
@@ -375,25 +446,6 @@ public class ArtworksPage extends JFrame {
         });
 
         rateButton.addActionListener(e -> RateArtworkWindow.showRatingDialog(this, artwork.getArtworkId(), artwork.getTitle()));
-
-        artistLabel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-
-                try (Connection conn = DBConnector.connect();
-                     PreparedStatement stmt = conn.prepareStatement("SELECT ArtistId FROM Artwork WHERE ArtworkId = ?")) {
-                    stmt.setString(1, artwork.getArtworkId());
-                    ResultSet rs = stmt.executeQuery();
-                    if (rs.next()) {
-                        String artistId = rs.getString("ArtistId");
-                        CurrentUser.currentArtist = artistId;
-                        new ArtistProfilePage().setVisible(true);
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "Unable to open artist profile.");
-                }
-            }
-        });
 
         card.add(titleLabel);
         card.add(Box.createVerticalStrut(5));
