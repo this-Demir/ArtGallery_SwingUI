@@ -12,6 +12,7 @@ public class HomePage extends JFrame {
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (UnsupportedLookAndFeelException e) {
+            System.out.println("flatlaf-demo-3.6.jar must add as library to run");
             e.printStackTrace();
         }
 
@@ -43,14 +44,20 @@ public class HomePage extends JFrame {
         JButton logoutButton = new JButton("Logout");
         JButton favoritesButton = new JButton("Favorites");
         JButton manageArtworksButton = new JButton("Manage My Artworks");
-
         JButton myProfileButton = new JButton("My Profile");
+        JButton myOrdersButton = new JButton("My Orders");
+
         myProfileButton.setBackground(new Color(186, 166, 11));
         myProfileButton.setForeground(Color.WHITE);
         myProfileButton.setPreferredSize(new Dimension(120, 30));
         myProfileButton.setFocusPainted(false);
         myProfileButton.addActionListener(e -> openArtistProfilePage());
 
+        myOrdersButton.setBackground(new Color(255, 140, 0));
+        myOrdersButton.setForeground(Color.WHITE);
+        myOrdersButton.setPreferredSize(new Dimension(120, 30));
+        myOrdersButton.setFocusPainted(false);
+        myOrdersButton.addActionListener(e -> openOrdersPage());
 
         favoritesButton.setBackground(new Color(40, 167, 69));
         favoritesButton.setForeground(Color.WHITE);
@@ -76,6 +83,7 @@ public class HomePage extends JFrame {
 
             if (CurrentUser.currentUser != null) {
                 navButtonPanel.add(favoritesButton);
+                navButtonPanel.add(myOrdersButton);
             }
             if (CurrentUser.currentArtist != null) {
                 navButtonPanel.add(manageArtworksButton);
@@ -85,7 +93,7 @@ public class HomePage extends JFrame {
             navButtonPanel.add(logoutButton);
 
         } else {
-            loginButton.setBackground(new Color(33, 150, 243));
+            loginButton.setBackground(new Color(72, 144, 239));
             loginButton.setForeground(Color.WHITE);
             loginButton.setPreferredSize(new Dimension(90, 30));
             loginButton.addActionListener(e -> openLoginPage());
@@ -121,7 +129,7 @@ public class HomePage extends JFrame {
 
         JButton seeAllArtworksButton = new JButton("See All Artworks");
         seeAllArtworksButton.setFont(new Font("Arial", Font.BOLD, 16));
-        seeAllArtworksButton.setBackground(new Color(72, 144, 239));
+        seeAllArtworksButton.setBackground(new Color(72, 208, 239));
         seeAllArtworksButton.setForeground(Color.WHITE);
         seeAllArtworksButton.setFocusPainted(false);
         seeAllArtworksButton.setPreferredSize(new Dimension(400, 80));
@@ -132,11 +140,10 @@ public class HomePage extends JFrame {
         headerPanel.add(seeAllArtworksButton);
 
         JLabel aboutUsContent = new JLabel("<html><div style='text-align: center;'>"
-                + "<br><b>About Us</b><br><br>"
-                + "Art Gallery is a modern platform for discovering, rating, and bidding on fine art.<br><br>"
-                + "Built by software engineering students at Yaşar University, the system provides a seamless experience for both customers and artists.<br><br>"
-                + "Technologies used include Java Swing, MySQL.<br><br>"
-                + "Enjoy browsing, rating, and purchasing unique artworks curated from talented artists."
+                + "<br><b>About Us<b><br><br>"
+                + "Art Gallery is a modern platform for discovering, rating, and bidding on artworks.<br><br>"
+                + "Built by software engineering students at Yaşar University for Se-2230 Project.<br><br>"
+                + "Technologies used include <b> Java Swing, MySQL <br><br>"
                 + "</div></html>");
         aboutUsContent.setFont(new Font("Arial", Font.PLAIN, 16));
         aboutUsContent.setForeground(Color.DARK_GRAY);
@@ -167,7 +174,6 @@ public class HomePage extends JFrame {
         profilePage.setVisible(true);
         this.setVisible(false);
     }
-
 
     private void openLoginPage() {
         LoginPage loginPage = new LoginPage();
@@ -205,6 +211,12 @@ public class HomePage extends JFrame {
     private void openManageArtworksPage() {
         ManageArtworksPage managePage = new ManageArtworksPage();
         managePage.setVisible(true);
+        this.setVisible(false);
+    }
+
+    private void openOrdersPage() {
+        CustomerOrdersPage ordersPage = new CustomerOrdersPage();
+        ordersPage.setVisible(true);
         this.setVisible(false);
     }
 

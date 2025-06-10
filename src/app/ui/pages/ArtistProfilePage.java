@@ -68,6 +68,10 @@ public class ArtistProfilePage extends JFrame {
         JLabel emailLabel = new JLabel();
         JLabel bioLabel = new JLabel();
         JLabel rateLabel = new JLabel();
+        JLabel mentorLabel = new JLabel();
+        mentorLabel.setFont(new Font("Arial", Font.ITALIC, 14));
+        mentorLabel.setForeground(new Color(33, 150, 243));
+        mentorLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Artist WHERE ArtistId = ?")) {
@@ -99,10 +103,39 @@ public class ArtistProfilePage extends JFrame {
             e.printStackTrace();
         }
 
+        // Fetch mentor info
+        boolean hasMentor = false;
+        try (Connection conn = DBConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "SELECT m.MentorId, a.FullName FROM Mentors m JOIN Artist a ON m.MentorId = a.ArtistId WHERE m.ArtistId = ?")) {
+
+            stmt.setString(1, artistId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String mentorName = rs.getString("FullName");
+                String mentorId = rs.getString("MentorId");
+                mentorLabel.setText("Mentor: " + mentorName);
+                mentorLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                    public void mouseClicked(java.awt.event.MouseEvent evt) {
+                        CurrentUser.currentArtist = mentorId;
+                        new ArtistProfilePage().setVisible(true);
+                    }
+                });
+                hasMentor = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (!hasMentor) {
+            mentorLabel.setText("Mentor: No mentor assigned");
+        }
+
         infoPanel.add(nameLabel);
         infoPanel.add(emailLabel);
         infoPanel.add(bioLabel);
         infoPanel.add(rateLabel);
+        infoPanel.add(mentorLabel);
 
         artistInfoContainer.add(profilePic);
         artistInfoContainer.add(infoPanel);
