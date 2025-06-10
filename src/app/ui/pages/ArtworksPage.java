@@ -97,8 +97,8 @@ public class ArtworksPage extends JFrame {
     }
 
     private void loadArtworks() {
-        checkAndFinalizeAuctions();
         artworkGridPanel.removeAll();
+        checkAndFinalizeAuctions();
         String searchQuery = searchField.getText().trim();
         String category = (String) categoryComboBox.getSelectedItem();
         List<Artwork> artworks = getAllArtworks(searchQuery, category);
@@ -354,8 +354,7 @@ public class ArtworksPage extends JFrame {
                     ResultSet rs = stmt.executeQuery();
                     if (rs.next()) {
                         String artistId = rs.getString("ArtistId");
-                        CurrentUser.currentArtist = artistId;
-                        new ArtistProfilePage().setVisible(true);
+                        new ArtistProfilePage(artistId).setVisible(true);
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();

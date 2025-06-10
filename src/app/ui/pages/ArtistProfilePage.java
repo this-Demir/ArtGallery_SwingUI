@@ -1,27 +1,24 @@
 package app.ui.pages;
 
 import app.data.DBConnector;
-import app.models.Artwork;
-import app.models.CurrentUser;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ArtistProfilePage extends JFrame {
 
     private JPanel artworkPanel;
+    private final String artistId;
 
-    public ArtistProfilePage() {
+    public ArtistProfilePage(String artistId) {
+        this.artistId = artistId;
+
         setTitle("Artist Profile");
         setSize(1200, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        String artistId = CurrentUser.currentArtist;
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.WHITE);
@@ -117,8 +114,7 @@ public class ArtistProfilePage extends JFrame {
                 mentorLabel.setText("Mentor: " + mentorName);
                 mentorLabel.addMouseListener(new java.awt.event.MouseAdapter() {
                     public void mouseClicked(java.awt.event.MouseEvent evt) {
-                        CurrentUser.currentArtist = mentorId;
-                        new ArtistProfilePage().setVisible(true);
+                        new ArtistProfilePage(mentorId).setVisible(true);
                     }
                 });
                 hasMentor = true;
@@ -156,10 +152,11 @@ public class ArtistProfilePage extends JFrame {
         mainPanel.add(centerContent, BorderLayout.CENTER);
         add(mainPanel);
 
-        loadArtworks(artistId);
+        loadArtworks();
     }
 
-    private void loadArtworks(String artistId) {
+    private void loadArtworks() {
+        artworkPanel.removeAll();
         String sql = "SELECT * FROM Artwork WHERE ArtistId = ?";
 
         try (Connection conn = DBConnector.connect();
@@ -200,13 +197,9 @@ public class ArtistProfilePage extends JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        artworkPanel.revalidate();
+        artworkPanel.repaint();
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            CurrentUser.currentArtist = "44c55577-4105-4fcd-9b16-af895c583e62";
-            ArtistProfilePage page = new ArtistProfilePage();
-            page.setVisible(true);
-        });
-    }
 }

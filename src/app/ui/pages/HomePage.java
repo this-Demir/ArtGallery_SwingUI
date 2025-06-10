@@ -170,7 +170,7 @@ public class HomePage extends JFrame {
     }
 
     private void openArtistProfilePage() {
-        ArtistProfilePage profilePage = new ArtistProfilePage();
+        ArtistProfilePage profilePage = new ArtistProfilePage(CurrentUser.currentArtist);
         profilePage.setVisible(true);
         this.setVisible(false);
     }

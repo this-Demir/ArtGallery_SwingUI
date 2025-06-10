@@ -5,7 +5,7 @@ import javax.swing.*;
 
 public class main {
     public static void main(String[] args) {
-        // IN FIRST TIME RUN
+        // todo: write a full db seeder for first time run  
         SwingUtilities.invokeLater(() -> {
             HomePage frame = new HomePage();
             frame.setVisible(true);
