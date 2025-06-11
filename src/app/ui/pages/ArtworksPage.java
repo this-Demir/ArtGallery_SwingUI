@@ -267,26 +267,44 @@ public class ArtworksPage extends JFrame {
                     ResultSet offerRs = offerStmt.executeQuery();
 
                     if (offerRs.next() && offerRs.getString("OfferId") != null) {
-                        // If offer exists -> sale it
                         String offerId = offerRs.getString("OfferId");
 
-                        String saleSql = "INSERT INTO Sales (SaleId, OfferId, SoldAt) VALUES (UUID(), ?, NOW())";
+                        // 1. Insert into Sales using procedure
+                        String saleSql = "CALL CreateSale(?)";
                         try (PreparedStatement saleStmt = conn.prepareStatement(saleSql)) {
                             saleStmt.setString(1, offerId);
                             saleStmt.executeUpdate();
                         }
 
-                        // Status = sold
+                        // 2. Retrieve SaleId based on OfferId
+                        String getSaleIdSql = "SELECT SaleId FROM Sales WHERE OfferId = ? ORDER BY SoldAt DESC LIMIT 1";
+                        String saleId = null;
+                        try (PreparedStatement saleIdStmt = conn.prepareStatement(getSaleIdSql)) {
+                            saleIdStmt.setString(1, offerId);
+                            ResultSet saleIdRs = saleIdStmt.executeQuery();
+                            if (saleIdRs.next()) {
+                                saleId = saleIdRs.getString("SaleId");
+                            }
+                        }
+
+                        // 3. Insert into Shipment using procedure
+                        if (saleId != null) {
+                            String shipmentSql = "CALL CreateShipmentForSaleId(?)";
+                            try (PreparedStatement shipmentStmt = conn.prepareStatement(shipmentSql)) {
+                                shipmentStmt.setString(1, saleId);
+                                shipmentStmt.executeUpdate();
+                            }
+                        }
+
+                        // 4. Update Artwork Status to 'sold'
                         try (PreparedStatement updateStmt = conn.prepareStatement("CALL UpdateArtworkStatus(?, ?)")) {
                             updateStmt.setString(1, artworkId);
                             updateStmt.setString(2, "sold");
-                            // TODO:
-                            //  -> New Shipment -Insert-
                             updateStmt.executeUpdate();
                         }
 
                     } else {
-                        //Status = close_to_sale
+                        // No offer: update artwork status to 'close_to_sale'
                         try (PreparedStatement updateStmt = conn.prepareStatement("CALL UpdateArtworkStatus(?, ?)")) {
                             updateStmt.setString(1, artworkId);
                             updateStmt.setString(2, "close_to_sale");
@@ -300,6 +318,8 @@ public class ArtworksPage extends JFrame {
             e.printStackTrace();
         }
     }
+
+
 
 
 

@@ -61,15 +61,7 @@ public class FavoritesPage extends JFrame {
     }
 
     private void loadFavorites() {
-        String sql = """
-                SELECT A.ArtworkId, A.Title, A.BasePrice, A.Category, A.Status,
-                       AR.FullName AS ArtistName
-                FROM Favorites F
-                JOIN Artwork A ON F.ArtworkId = A.ArtworkId
-                JOIN Artist AR ON A.ArtistId = AR.ArtistId
-                WHERE F.CustomerId = ?
-                ORDER BY F.FavoritedAt DESC
-                """;
+        String sql = "CALL GetFavoritesByCustomer(?)";
 
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -253,17 +245,18 @@ public class FavoritesPage extends JFrame {
     }
 
     private void removeFavorite(String customerId, String artworkId) {
-        String sql = "DELETE FROM Favorites WHERE CustomerId = ? AND ArtworkId = ?";
+        String sql = "CALL RemoveFavorite(?, ?)";
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, customerId);
             stmt.setString(2, artworkId);
             stmt.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
 
 
 public static void main(String[] args) {

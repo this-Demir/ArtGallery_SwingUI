@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBConnector {
 
     // Database credentials
-    private static final String URL = "jdbc:mysql://localhost:3306/artgallerysystem";  // Replace with your database URL
+    private static final String URL = "jdbc:mysql://localhost:3306/artgallerysystem_v3";  // Replace with your database URL
     private static final String USER = "root";           // Replace with your MySQL username
     private static final String PASSWORD = "123456789";  // Replace with your MySQL password
 

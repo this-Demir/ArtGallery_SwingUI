@@ -115,7 +115,6 @@ public class CustomerOrdersPage extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            CurrentUser.currentUser = "62a2026b-ab87-4008-b6e5-047f0de41a3c";
             new CustomerOrdersPage().setVisible(true);
         });
     }

@@ -23,7 +23,7 @@ public class ArtistProfilePage extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.WHITE);
 
-        // Top Navigation
+
         JPanel navBar = new JPanel(new BorderLayout());
         navBar.setBackground(new Color(72, 144, 239));
         navBar.setPreferredSize(new Dimension(1000, 50));
@@ -199,6 +199,7 @@ public class ArtistProfilePage extends JFrame {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
 
         artworkPanel.revalidate();
         artworkPanel.repaint();

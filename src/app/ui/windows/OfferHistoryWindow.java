@@ -21,9 +21,7 @@ public class OfferHistoryWindow {
         history.append("Artwork: ").append(artworkTitle).append("\n");
         history.append("-----------------------------\n\n");
 
-        String sql = "SELECT o.Amount, c.FullName, o.OfferTime " +
-                "FROM Offer o JOIN Customer c ON o.CustomerId = c.CustomerId " +
-                "WHERE o.ArtworkId = ? ORDER BY o.OfferTime DESC";
+        String sql = "CALL GetOfferHistoryForArtwork(?)";
 
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
