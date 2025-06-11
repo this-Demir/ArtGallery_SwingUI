@@ -100,14 +100,14 @@ public class ArtistProfilePage extends JFrame {
             e.printStackTrace();
         }
 
-        // Fetch mentor info
+        // mentor info
         boolean hasMentor = false;
         try (Connection conn = DBConnector.connect();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "SELECT m.MentorId, a.FullName FROM Mentors m JOIN Artist a ON m.MentorId = a.ArtistId WHERE m.ArtistId = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("CALL GetMentorInfoByArtistId(?)")) {
 
             stmt.setString(1, artistId);
             ResultSet rs = stmt.executeQuery();
+
             if (rs.next()) {
                 String mentorName = rs.getString("FullName");
                 String mentorId = rs.getString("MentorId");
@@ -119,6 +119,7 @@ public class ArtistProfilePage extends JFrame {
                 });
                 hasMentor = true;
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -126,6 +127,7 @@ public class ArtistProfilePage extends JFrame {
         if (!hasMentor) {
             mentorLabel.setText("Mentor: No mentor assigned");
         }
+
 
         infoPanel.add(nameLabel);
         infoPanel.add(emailLabel);

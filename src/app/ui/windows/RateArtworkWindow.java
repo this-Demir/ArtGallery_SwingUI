@@ -76,9 +76,7 @@ public class RateArtworkWindow {
     }
 
     private static void saveRating(String artworkId, int ratingValue) {
-        String sql = "INSERT INTO Rate (CustomerId, ArtworkId, RatingValue, RatedAt) " +
-                "VALUES (?, ?, ?, NOW()) " +
-                "ON DUPLICATE KEY UPDATE RatingValue = VALUES(RatingValue), RatedAt = VALUES(RatedAt)";
+        String sql = "CALL SaveOrUpdateRating(?, ?, ?)";
 
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -95,4 +93,5 @@ public class RateArtworkWindow {
             JOptionPane.showMessageDialog(null, "An error occurred while submitting your rating.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 }

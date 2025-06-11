@@ -113,19 +113,13 @@ public class ArtworksPage extends JFrame {
 
     private List<Artwork> getAllArtworks(String searchQuery, String category) {
         List<Artwork> artworks = new ArrayList<>();
-        String sql = "SELECT * FROM Artwork WHERE Title LIKE ? OR ArtistId IN (SELECT ArtistId FROM Artist WHERE FullName LIKE ?)";
-        if (!category.equals("All")) {
-            sql += " AND Category = ?";
-        }
+        String sql = "CALL SearchArtworksWithCategory(?, ?)";
 
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, "%" + searchQuery + "%");
-            stmt.setString(2, "%" + searchQuery + "%");
-            if (!category.equals("All")) {
-                stmt.setString(3, category);
-            }
+            stmt.setString(1, searchQuery);
+            stmt.setString(2, category);
 
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -137,43 +131,55 @@ public class ArtworksPage extends JFrame {
                 List<String> imageUrls = getImageUrlsForArtwork(artworkId);
                 String artworkCategory = rs.getString("Category");
                 Timestamp endTime = getEndTimeForArtwork(artworkId);
-                artworks.add(new Artwork(artworkId, title, artistName, currentPrice, rating, currentPrice, imageUrls, artworkCategory, endTime));
+
+                artworks.add(new Artwork(
+                        artworkId, title, artistName, currentPrice, rating, currentPrice,
+                        imageUrls, artworkCategory, endTime
+                ));
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return artworks;
     }
 
+
     private double getHighestOffer(String artworkId) {
-        String sql = "SELECT MAX(Amount) AS MaxOffer FROM Offer WHERE ArtworkId = ?";
+        String sql = "SELECT GetHighestOfferOrBase(?) AS MaxOffer";
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, artworkId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                double offer = rs.getDouble("MaxOffer");
-                return offer > 0 ? offer : getBasePrice(artworkId);
+                return rs.getDouble("MaxOffer");
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return getBasePrice(artworkId);
+
+        return 0.0;
     }
 
     private double getBasePrice(String artworkId) {
-        String sql = "SELECT BasePrice FROM Artwork WHERE ArtworkId = ?";
+        String sql = "SELECT GetBasePrice(?) AS BasePrice";
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, artworkId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getDouble("BasePrice");
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 0;
+
+        return 0.0;
     }
 
     private List<String> getImageUrlsForArtwork(String artworkId) {
@@ -205,25 +211,38 @@ public class ArtworksPage extends JFrame {
     }
 
     private double getRatingForArtwork(String artworkId) {
+        String sql = "SELECT GetArtworkAverageRating(?) AS avgRating";
+
         try (Connection conn = DBConnector.connect();
-             PreparedStatement stmt = conn.prepareStatement("SELECT AVG(RatingValue) AS avgRating FROM Rate WHERE ArtworkId = ?")) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, artworkId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) return rs.getDouble("avgRating");
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    double rating = rs.getDouble("avgRating");
+                    return rs.wasNull() ? 0.0 : rating;   // NULL -> 0.0
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 0;
+        return 0.0;
     }
 
+
     private Timestamp getEndTimeForArtwork(String artworkId) {
-        String sql = "SELECT EndTime FROM Countdown WHERE ArtworkId = ?";
+        String sql = "SELECT GetEndTimeForArtwork(?) AS EndTime";
+
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, artworkId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getTimestamp("EndTime");
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getTimestamp("EndTime");
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -231,10 +250,9 @@ public class ArtworksPage extends JFrame {
         return null;
     }
 
+
     private void checkAndFinalizeAuctions() {
-        String sql = "SELECT a.ArtworkId, c.EndTime, a.Status FROM Artwork a " +
-                "JOIN Countdown c ON a.ArtworkId = c.ArtworkId " +
-                "WHERE c.EndTime < NOW() AND a.Status = 'open_to_sale'";
+        String sql = "CALL GetEndedAuctions()";
 
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -243,30 +261,35 @@ public class ArtworksPage extends JFrame {
             while (rs.next()) {
                 String artworkId = rs.getString("ArtworkId");
 
-                String offerSql = "SELECT OfferId FROM Offer WHERE ArtworkId = ? ORDER BY Amount DESC LIMIT 1";
+                String offerSql = "SELECT GetHighestOfferId(?) AS OfferId";
                 try (PreparedStatement offerStmt = conn.prepareStatement(offerSql)) {
                     offerStmt.setString(1, artworkId);
                     ResultSet offerRs = offerStmt.executeQuery();
 
-                    if (offerRs.next()) {
-                        // Teklif varsa: Satışı gerçekleştir
+                    if (offerRs.next() && offerRs.getString("OfferId") != null) {
+                        // If offer exists -> sale it
                         String offerId = offerRs.getString("OfferId");
+
                         String saleSql = "INSERT INTO Sales (SaleId, OfferId, SoldAt) VALUES (UUID(), ?, NOW())";
                         try (PreparedStatement saleStmt = conn.prepareStatement(saleSql)) {
                             saleStmt.setString(1, offerId);
                             saleStmt.executeUpdate();
                         }
 
-                        String updateArtwork = "UPDATE Artwork SET Status = 'sold' WHERE ArtworkId = ?";
-                        try (PreparedStatement updateStmt = conn.prepareStatement(updateArtwork)) {
+                        // Status = sold
+                        try (PreparedStatement updateStmt = conn.prepareStatement("CALL UpdateArtworkStatus(?, ?)")) {
                             updateStmt.setString(1, artworkId);
+                            updateStmt.setString(2, "sold");
+                            // TODO:
+                            //  -> New Shipment -Insert-
                             updateStmt.executeUpdate();
                         }
+
                     } else {
-                        // Teklif yoksa: Satılamadı
-                        String updateArtwork = "UPDATE Artwork SET Status = 'close_to_sale' WHERE ArtworkId = ?";
-                        try (PreparedStatement updateStmt = conn.prepareStatement(updateArtwork)) {
+                        //Status = close_to_sale
+                        try (PreparedStatement updateStmt = conn.prepareStatement("CALL UpdateArtworkStatus(?, ?)")) {
                             updateStmt.setString(1, artworkId);
+                            updateStmt.setString(2, "close_to_sale");
                             updateStmt.executeUpdate();
                         }
                     }
@@ -277,6 +300,7 @@ public class ArtworksPage extends JFrame {
             e.printStackTrace();
         }
     }
+
 
 
     private JPanel createImageSlider(List<String> imagePaths) {
@@ -415,7 +439,7 @@ public class ArtworksPage extends JFrame {
                 JOptionPane.showMessageDialog(card, "You must be logged in as a customer to favorite artworks.");
                 return;
             }
-            String sql = "INSERT IGNORE INTO Favorites (CustomerId, ArtworkId, FavoritedAt) VALUES (?, ?, NOW())";
+            String sql = "CALL AddToFavorite(?, ?)";
             try (Connection conn = DBConnector.connect();
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, CurrentUser.currentUser);
