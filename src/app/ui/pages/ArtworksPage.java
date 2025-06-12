@@ -147,21 +147,22 @@ public class ArtworksPage extends JFrame {
 
 
     private double getHighestOffer(String artworkId) {
-        String sql = "SELECT GetHighestOfferOrBase(?) AS MaxOffer";
+        String sql = "SELECT MAX(Amount) AS MaxOffer FROM Offer WHERE ArtworkId = ?";
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, artworkId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getDouble("MaxOffer");
+                double offer = rs.getDouble("MaxOffer");
+                return offer > 0 ? offer : getBasePrice(artworkId);
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return getBasePrice(artworkId);
 
-        return 0.0;
     }
 
     private double getBasePrice(String artworkId) {
