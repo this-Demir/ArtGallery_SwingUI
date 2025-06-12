@@ -119,6 +119,7 @@ public class LoginPage extends JFrame {
             return;
         }
 
+        // Login call (customer / artist)
         String sql = "{CALL sp_LoginUser(?, ?, ?, ?)}";
 
         try (Connection conn = DBConnector.connect();
