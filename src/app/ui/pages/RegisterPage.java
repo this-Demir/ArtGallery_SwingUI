@@ -160,7 +160,7 @@ public class RegisterPage extends JFrame {
     }
 
     private void registerCustomer(String fullName, String email, String password, String address) {
-        String sql = "{CALL sp_RegisterCustomer(?, ?, ?, ?, ?)}";
+        String sql = "{CALL RegisterCustomer(?, ?, ?, ?, ?)}";
 
         try (Connection conn = DBConnector.connect();
              CallableStatement stmt = conn.prepareCall(sql)) {
@@ -184,7 +184,7 @@ public class RegisterPage extends JFrame {
     }
 
     private void registerArtist(String fullName, String email, String password, String bio, String profileImage) {
-        String sql = "{CALL sp_RegisterArtist(?, ?, ?, ?, ?, ?, ?)}";
+        String sql = "{CALL RegisterArtist(?, ?, ?, ?, ?, ?, ?)}";
 
         try (Connection conn = DBConnector.connect();
              CallableStatement stmt = conn.prepareCall(sql)) {
@@ -221,10 +221,4 @@ public class RegisterPage extends JFrame {
         this.setVisible(false);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            RegisterPage frame = new RegisterPage();
-            frame.setVisible(true);
-        });
-    }
 }

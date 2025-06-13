@@ -513,10 +513,4 @@ public class ArtworksPage extends JFrame {
         this.setVisible(false);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            ArtworksPage frame = new ArtworksPage();
-            frame.setVisible(true);
-        });
-    }
 }

@@ -120,7 +120,7 @@ public class LoginPage extends JFrame {
         }
 
         // Login call (customer / artist)
-        String sql = "{CALL sp_LoginUser(?, ?, ?, ?)}";
+        String sql = "{CALL LoginUser(?, ?, ?, ?)}";
 
         try (Connection conn = DBConnector.connect();
              CallableStatement stmt = conn.prepareCall(sql)) {
@@ -170,10 +170,4 @@ public class LoginPage extends JFrame {
         this.setVisible(false);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            LoginPage frame = new LoginPage();
-            frame.setVisible(true);
-        });
-    }
 }

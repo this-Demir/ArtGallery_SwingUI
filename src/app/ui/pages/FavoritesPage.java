@@ -259,11 +259,4 @@ public class FavoritesPage extends JFrame {
     }
 
 
-public static void main(String[] args) {
-        //CurrentUser.currentUser = "d5006df1-3d9c-41df-a80a-74202d4aa725"; For Testing -> demo login
-        SwingUtilities.invokeLater(() -> {
-            FavoritesPage favoritesPage = new FavoritesPage();
-            favoritesPage.setVisible(true);
-        });
-    }
 }

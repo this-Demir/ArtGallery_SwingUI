@@ -113,9 +113,4 @@ public class CustomerOrdersPage extends JFrame {
         add(mainPanel);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new CustomerOrdersPage().setVisible(true);
-        });
-    }
 }

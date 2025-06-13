@@ -318,11 +318,5 @@ public class ManageArtworksPage extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        CurrentUser.currentArtist = "711bc063-784b-4dc6-b76c-f476163415c4";
-        SwingUtilities.invokeLater(() -> {
-            ManageArtworksPage page = new ManageArtworksPage();
-            page.setVisible(true);
-        });
-    }
+
 }
