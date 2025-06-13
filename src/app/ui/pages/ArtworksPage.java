@@ -67,7 +67,7 @@ public class ArtworksPage extends JFrame {
         JLabel categoryLabel = new JLabel("Category:");
         headerPanel.add(categoryLabel);
 
-        String[] categories = {"All", "Landscape", "Seascape", "Abstract", "Portrait"};
+        String[] categories = {"All", "Figure", "Portrait", "Genre", "Figurative","Landscape","Schematic"};
         categoryComboBox = new JComboBox<>(categories);
         headerPanel.add(categoryComboBox);
 
