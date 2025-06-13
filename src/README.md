@@ -5,7 +5,14 @@
 - Batuhan Salcan - 22070006040
 - Beril Filibelioğlu - 22070006042
 - Yağmur Pazı - 23070006066
+---
 
+### Project Repository: https://github.com/this-Demir/ArtGallery_SwingUI
+
+---
+> **Note:** The detailed database schema is provided below.
+---
+> **Note:** Test data is provided in `src/app/AppRun.java` as command-line.
 ---
 ### Technologies Used: Java Swing + MySQL
 
@@ -128,8 +135,109 @@ String password = "your_password";
 | **RateArtworkWindow**      | Submit artwork ratings                                                                | `CALL SaveOrUpdateRating(?, ?, ?)`                   |
 | **OfferHistoryWindow**     | Show past offers for a selected artwork                                               | `CALL GetOfferHistoryForArtwork(?)`                 |
 
-<sub>**Note:** Each row above includes only one sample SQL query for the corresponding UI component. In reality, many of these classes involve multiple SQL operations such as `UPDATE`, `DELETE`, nested `SELECT`, and complex JOIN queries depending on the actions performed by the user.</sub>
+ > Note:Each row above includes only one sample SQL query for the corresponding UI component. In reality, many of these classes involve multiple SQL operations such as `UPDATE`, `DELETE`, nested `SELECT`, and complex JOIN queries depending on the actions performed by the user.</sub>
 
 ---
+
+## Database Schema
+
+### Customer
+| Column     | Type         | Constraints               |
+|------------|--------------|---------------------------|
+| CustomerId | CHAR(36)     | PRIMARY KEY, NOT NULL     |
+| FullName   | VARCHAR(200) | NOT NULL                  |
+| Email      | VARCHAR(255) | NOT NULL, UNIQUE          |
+| Password   | VARCHAR(255) | NOT NULL                  |
+| Address    | VARCHAR(500) |                           |
+| CreatedAt  | DATETIME     | NOT NULL                  |
+
+### Artist
+| Column        | Type          | Constraints               |
+|---------------|---------------|---------------------------|
+| ArtistId      | CHAR(36)      | PRIMARY KEY, NOT NULL     |
+| FullName      | VARCHAR(200)  | NOT NULL                  |
+| Email         | VARCHAR(255)  | NOT NULL, UNIQUE          |
+| Password      | VARCHAR(255)  | NOT NULL                  |
+| Bio           | TEXT          |                           |
+| ProfileImgUrl | VARCHAR(500)  |                           |
+| ArtistRate    | DECIMAL(3,2)  |                           |
+| CreatedAt     | DATETIME      | NOT NULL                  |
+
+### Artwork
+| Column       | Type           | Constraints                                              |
+|--------------|----------------|----------------------------------------------------------|
+| ArtworkId    | CHAR(36)       | PRIMARY KEY, NOT NULL                                    |
+| ArtistId     | CHAR(36)       | NOT NULL, FOREIGN KEY → Artist(ArtistId)                 |
+| Title        | VARCHAR(200)   | NOT NULL                                                 |
+| Descp        | TEXT           |                                                          |
+| BasePrice    | DECIMAL(18,2)  | NOT NULL                                                 |
+| Category     | VARCHAR(100)   |                                                          |
+| Status       | VARCHAR(50)    | NOT NULL                                                 |
+| IsOpenToSale | TINYINT(1)     | NOT NULL                                                 |
+| CreatedAt    | DATETIME       | NOT NULL                                                 |
+
+### Countdown
+| Column     | Type       | Constraints                                         |
+|------------|------------|-----------------------------------------------------|
+| ArtworkId  | CHAR(36)   | PRIMARY KEY, NOT NULL, FOREIGN KEY → Artwork(ArtworkId) |
+| EndTime    | DATETIME   | NOT NULL                                            |
+| IsRunning  | TINYINT(1) | NOT NULL                                            |
+
+### ArtworkImages
+| Column     | Type          | Constraints                                         |
+|------------|---------------|-----------------------------------------------------|
+| ImageId    | CHAR(36)      | PRIMARY KEY, NOT NULL                               |
+| ArtworkId  | CHAR(36)      | NOT NULL, FOREIGN KEY → Artwork(ArtworkId)          |
+| ImageUrl   | VARCHAR(500)  | NOT NULL                                            |
+
+### Favorites
+| Column      | Type       | Constraints                                                       |
+|-------------|------------|-------------------------------------------------------------------|
+| CustomerId  | CHAR(36)   | PRIMARY KEY (with ArtworkId), NOT NULL, FOREIGN KEY → Customer(CustomerId) |
+| ArtworkId   | CHAR(36)   | PRIMARY KEY (with CustomerId), NOT NULL, FOREIGN KEY → Artwork(ArtworkId)   |
+| FavoritedAt | DATETIME   | NOT NULL                                                          |
+
+### Rate
+| Column      | Type     | Constraints                                                       |
+|-------------|----------|-------------------------------------------------------------------|
+| CustomerId  | CHAR(36) | PRIMARY KEY (with ArtworkId), NOT NULL, FOREIGN KEY → Customer(CustomerId) |
+| ArtworkId   | CHAR(36) | PRIMARY KEY (with CustomerId), NOT NULL, FOREIGN KEY → Artwork(ArtworkId)   |
+| RatingValue | TINYINT  | NOT NULL                                                          |
+| RatedAt     | DATETIME | NOT NULL                                                          |
+
+### Offer
+| Column      | Type           | Constraints                                                       |
+|-------------|----------------|-------------------------------------------------------------------|
+| OfferId     | CHAR(36)       | PRIMARY KEY, NOT NULL                                             |
+| CustomerId  | CHAR(36)       | NOT NULL, FOREIGN KEY → Customer(CustomerId)                      |
+| ArtworkId   | CHAR(36)       | NOT NULL, FOREIGN KEY → Artwork(ArtworkId)                        |
+| Amount      | DECIMAL(18,2)  | NOT NULL                                                          |
+| OfferStatus | VARCHAR(50)    | NOT NULL                                                          |
+| OfferTime   | DATETIME       | NOT NULL                                                          |
+| minIncrease | DECIMAL(18,2)  | NOT NULL                                                          |
+
+### Sales
+| Column  | Type     | Constraints                                              |
+|---------|----------|----------------------------------------------------------|
+| SaleId  | CHAR(36) | PRIMARY KEY, NOT NULL                                    |
+| OfferId | CHAR(36) | NOT NULL, FOREIGN KEY → Offer(OfferId)                   |
+| SoldAt  | DATETIME | NOT NULL                                                 |
+
+### Shipment
+| Column      | Type        | Constraints                                              |
+|-------------|-------------|----------------------------------------------------------|
+| TrackId     | CHAR(36)    | PRIMARY KEY, NOT NULL                                    |
+| SaleId      | CHAR(36)    | NOT NULL, FOREIGN KEY → Sales(SaleId)                    |
+| Status      | VARCHAR(50) | NOT NULL                                                 |
+| DeliveredAt | DATETIME    |                                                          |
+
+### Mentors
+| Column    | Type     | Constraints                                                      |
+|-----------|----------|------------------------------------------------------------------|
+| ArtistId  | CHAR(36) | PRIMARY KEY (with MentorId), NOT NULL, FOREIGN KEY → Artist(ArtistId) |
+| MentorId  | CHAR(36) | PRIMARY KEY (with ArtistId), NOT NULL, FOREIGN KEY → Artist(ArtistId) |
+
+---
+
 
 
