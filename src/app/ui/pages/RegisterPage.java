@@ -201,7 +201,7 @@ public class RegisterPage extends JFrame {
 
             stmt.execute();
             JOptionPane.showMessageDialog(this, "Artist registered successfully!");
-            openLoginPage(); // Auto-redirect to login
+            openLoginPage();
 
         } catch (SQLException e) {
             e.printStackTrace();

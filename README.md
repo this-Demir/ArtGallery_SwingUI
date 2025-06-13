@@ -1,6 +1,6 @@
 # Se2230- Project: Art Gallery System
----
-## Group Members
+
+### Group Members
 - Demir Demirdöğen - 23070006036
 - Batuhan Salcan - 22070006040
 - Beril Filibelioğlu - 22070006042

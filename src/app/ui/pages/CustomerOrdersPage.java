@@ -56,12 +56,9 @@ public class CustomerOrdersPage extends JFrame {
 
         try (Connection conn = DBConnector.connect();
              PreparedStatement stmt = conn.prepareStatement(
-                     "SELECT s.SaleId, s.SoldAt, o.Amount, a.Title, sh.Status, sh.DeliveredAt " +
-                             "FROM Sales s " +
-                             "JOIN Offer o ON s.OfferId = o.OfferId " +
-                             "JOIN Artwork a ON o.ArtworkId = a.ArtworkId " +
-                             "LEFT JOIN Shipment sh ON s.SaleId = sh.SaleId " +
-                             "WHERE o.CustomerId = ? ORDER BY s.SoldAt DESC")) {
+                     "SELECT SaleId, SoldAt, Amount, Title, ShipmentStatus, DeliveredAt " +
+                             "FROM CustomerPurchaseHistoryView " +
+                             "WHERE CustomerId = ? ORDER BY SoldAt DESC")) {
 
             stmt.setString(1, CurrentUser.currentUser);
             ResultSet rs = stmt.executeQuery();
@@ -69,20 +66,19 @@ public class CustomerOrdersPage extends JFrame {
             while (rs.next()) {
                 hasOrders = true;
 
-                JPanel card = new JPanel();
-                card.setLayout(new GridLayout(3, 2, 10, 5));
+                String artworkTitle = rs.getString("Title");
+                String saleId = rs.getString("SaleId");
+                double amount = rs.getDouble("Amount");
+                String soldAt = rs.getString("SoldAt");
+                String status = rs.getString("ShipmentStatus") != null ? rs.getString("ShipmentStatus") : "Pending";
+                String deliveredAt = rs.getString("DeliveredAt") != null ? rs.getString("DeliveredAt") : "Not Delivered Yet";
+
+                JPanel card = new JPanel(new GridLayout(3, 2, 10, 5));
                 card.setBorder(BorderFactory.createCompoundBorder(
                         BorderFactory.createLineBorder(new Color(200, 200, 200)),
                         BorderFactory.createEmptyBorder(10, 15, 10, 15)));
                 card.setBackground(new Color(250, 250, 250));
                 card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
-
-                String artworkTitle = rs.getString("Title");
-                String saleId = rs.getString("SaleId");
-                double amount = rs.getDouble("Amount");
-                String soldAt = rs.getString("SoldAt");
-                String status = rs.getString("Status") != null ? rs.getString("Status") : "Pending";
-                String deliveredAt = rs.getString("DeliveredAt") != null ? rs.getString("DeliveredAt") : "Not Delivered Yet";
 
                 card.add(new JLabel("Artwork Title: " + artworkTitle));
                 card.add(new JLabel("Sale ID: " + saleId));
@@ -99,6 +95,7 @@ public class CustomerOrdersPage extends JFrame {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error loading orders.");
         }
+
 
         if (!hasOrders) {
             JLabel noOrdersLabel = new JLabel("You have no orders.");

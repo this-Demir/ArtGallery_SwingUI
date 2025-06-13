@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBConnector {
 
     // Database credentials
-    private static final String URL = "jdbc:mysql://localhost:3306/artgallerysystem_v3";
+    private static final String URL = "jdbc:mysql://localhost:3306/artgallerysystem";
     private static final String USER = "root";
     private static final String PASSWORD = "123456789";
 
@@ -21,15 +21,5 @@ public class DBConnector {
         }
     }
 
-
-    public static void close(Connection connection) {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Error closing connection: " + e.getMessage());
-        }
-    }
 }
 
