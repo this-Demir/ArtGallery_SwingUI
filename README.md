@@ -5,15 +5,13 @@
 - Batuhan Salcan - 22070006040
 - Beril Filibelioğlu - 22070006042
 - Yağmur Pazı - 23070006066
----
+
 
 ### Project Repository: https://github.com/this-Demir/ArtGallery_SwingUI
 
----
 > **Note:** The detailed database schema is provided below.
----
+
 > **Note:** Test data is provided in `src/app/AppRun.java` as command-line.
----
 ### Technologies Used: Java Swing + MySQL
 
 **This project is SQL-focused**. Most of the logic—such as artwork management, bidding, rating, and offer validation—is executed directly from the UI using **structured SQL operations**. These include:
