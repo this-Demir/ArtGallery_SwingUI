@@ -1,12 +1,5 @@
 # Se2230- Project: Art Gallery System
 
-### Group Members
-- Demir Demirdöğen - 23070006036
-- Batuhan Salcan - 22070006040
-- Beril Filibelioğlu - 22070006042
-- Yağmur Pazı - 23070006066
-
-
 ### Project Repository: https://github.com/this-Demir/ArtGallery_SwingUI
 
 > **Note:** The detailed database schema is provided below.
